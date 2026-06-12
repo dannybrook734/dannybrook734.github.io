@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSA Project - 6th Grade MMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 100%);
+        }
+        #viewer-container {
+            height: 35vh;
+            background: #1a1a2e;
+            border-top: 3px solid #6a0dad;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        #media-viewer {
+            max-width: 90%;
+            max-height: 90%;
+            display: none;
+        }
+        #close-media {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
+        #close-media:hover {
+            background: #cc0000;
+        }
+        .ui-panel {
+            position: absolute;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #6a0dad;
+        }
+        #title-panel {
+            top: 20px;
+            left: 20px;
+        }
+        #title-panel h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #9d4edd;
+        }
+        #title-panel p {
+            font-size: 14px;
+            color: #ccc;
+        }
+        #name-tag {
+            margin-top: 15px;
+            background: white;
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            border: 3px solid #cc0000;
+            font-family: 'Courier New', monospace;
+        }
+        #name-tag-header {
+            color: #cc0000;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        #name-tag-name {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            color: #000;
+        }
+        #upload-panel {
+            bottom: 20px;
+            right: 20px;
+        }
+        #upload-panel input {
+            margin-bottom: 10px;
+        }
+        #upload-panel button {
+            background: #6a0dad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        #upload-panel button:hover {
+            background: #9d4edd;
+        }
+        #zoom-panel {
+            bottom: 20px;
+            left: 20px;
+            width: 250px;
+        }
+        #zoom-slider {
+            width: 100%;
+            margin-top: 10px;
+        }
+        #zoom-label {
+            font-size: 14px;
+            color: #9d4edd;
+        }
+        #upload-status {
+            color: #4ade80;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        #viewer-placeholder {
+            color: #666;
+            font-size: 18px;
+        }
+        #mode-panel {
+            top: 20px;
+            right: 20px;
+            width: 200px;
+        }
+        #mode-label {
+            font-size: 14px;
+            color: #9d4edd;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #mode-slider {
+            width: 100%;
+            margin-top: 5px;
+        }
+        #mode-icons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 18px;
+        }
+        #action-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 12px;
+        }
+        #action-buttons button {
+            background: transparent;
+            border: 2px solid #9d4edd;
+            color: white;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #action-buttons button:hover {
+            background: #9d4edd;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+            
+            <div id="title-panel" class="ui-panel">
+                <h1>PSA Project - 6th Grade MMS</h1>
+                <p>🎩 Use arrow keys to explore!</p>
+                <p>🦎 Click orbitals to view media</p>
+                <p>✨ Press SPACE for magic flowers!</p>
+                
+                <div id="name-tag">
+                    <div id="name-tag-header">HELLO MY NAME IS</div>
+                    <div id="name-tag-name">Billy Bob Joe McJagger<br>Pizza Hamilton the 3rd</div>
+                </div>
+            </div>
+            
+            <div id="mode-panel" class="ui-panel">
+                <div id="mode-label">Mode: Normal</div>
+                <input type="range" id="mode-slider" min="0" max="3" value="0" step="1">
+                <div id="mode-icons">
+                    <span title="Normal">✨</span>
+                    <span title="Rainbow">🌈</span>
+                    <span title="Party">🎉</span>
+                    <span title="Auto">🔄</span>
+                </div>
+                <div id="action-buttons">
+                    <button onclick="lizardWave()" title="Wave">👋</button>
+                    <button onclick="lizardJump()" title="Jump">🦘</button>
+                    <button onclick="lizardDance()" title="Dance">💃</button>
+                </div>
+            </div>
+            
+            <div id="zoom-panel" class="ui-panel">
+                <div id="zoom-label">Zoom: Medium</div>
+                <input type="range" id="zoom-slider" min="20" max="200" value="80" step="5">
+            </div>
+            
+            <div id="upload-panel" class="ui-panel">
+                <input type="file" id="file-input" multiple accept="audio/*,video/*">
+                <br>
+                <button onclick="uploadFiles()">📁 Upload Media</button>
+                <button onclick="savePlanet()">💾 Save Planet</button>
+                <button onclick="document.getElementById('load-input').click()">📂 Load Planet</button>
+                <input type="file" id="load-input" accept=".json" style="display:none" onchange="loadPlanet(event)">
+                <div id="upload-status"></div>
+            </div>
+        </div>
+        
+        <div id="viewer-container">
+            <button id="close-media" onclick="closeMedia()">✖ Close</button>
+            <video id="media-viewer" controls></video>
+            <audio id="media-viewer-audio" controls style="display:none"></audio>
+            <div id="viewer-placeholder">Upload media and click orbitals to play here! 🎬🎵</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        console.log('🎩 PSA Project - Billy Bob Joe McJagger Pizza Hamilton the 3rd Edition!');
+        
+        // Scene setup
+        const canvas = document.getElementById('canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.65), 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        
+        function resizeRenderer() {
+            const width = window.innerWidth;
+            const height = window.innerHeight * 0.65;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        resizeRenderer();
+        window.addEventListener('resize', resizeRenderer);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+        
+        // Stars
+        const starGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+        for (let i = 0; i < 3000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+        
+        // Create purple moon texture
+        function createPurpleMoonTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#6a0dad');
+            gradient.addColorStop(0.5, '#8b5cf6');
+            gradient.addColorStop(1, '#9d4edd');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add craters
+            for (let i = 0; i < 250; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 40 + 10;
+                
+                const craterGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                craterGradient.addColorStop(0, '#4a0080');
+                craterGradient.addColorStop(0.7, '#5a0a9d');
+                craterGradient.addColorStop(1, '#7a2db8');
+                
+                ctx.fillStyle = craterGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Add highlands
+            for (let i = 0; i < 120; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 60 + 20;
+                
+                ctx.fillStyle = `rgba(157, 78, 221, ${Math.random() * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+        
+        // Planet
+        const planetRadius = 50;
+        const planetGeometry = new THREE.SphereGeometry(planetRadius, 128, 128);
+        const planetTexture = createPurpleMoonTexture();
+        const planetMaterial = new THREE.MeshPhongMaterial({ 
+            map: planetTexture,
+            bumpMap: planetTexture,
+            bumpScale: 2
+        });
+        const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+        scene.add(planet);
+        
+        // CRESTED GECKO - Billy Bob! 🦎🎩
+        const gecko = new THREE.Group();
+        
+        // Body
+        const bodyGeometry = new THREE.SphereGeometry(1.3, 32, 32);
+        bodyGeometry.scale(1, 1.4, 0.85);
+        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        gecko.add(body);
+        
+        // Head
+        const headGeometry = new THREE.SphereGeometry(1.1, 32, 32);
+        headGeometry.scale(1.3, 1, 1.2);
+        const headMaterial = new THREE.MeshPhongMaterial({ color: 0xffd4e5 });
+        const head = new THREE.Mesh(headGeometry, headMaterial);
+        head.position.set(0, 1.9, 0.6);
+        gecko.add(head);
+        
+        // Snout
+        const snoutGeometry = new THREE.SphereGeometry(0.45, 16, 16);
+        snoutGeometry.scale(1, 0.55, 1.5);
+        const snoutMaterial = new THREE.MeshPhongMaterial({ color: 0xffe4f0 });
+        const snout = new THREE.Mesh(snoutGeometry, snoutMaterial);
+        snout.position.set(0, 1.7, 1.4);
+        gecko.add(snout);
+        
+        // CRESTED GECKO CREST!
+        for (let i = 0; i < 6; i++) {
+            const crestGeometry = new THREE.ConeGeometry(0.18, 0.5, 8);
+            const crestMaterial = new THREE.MeshPhongMaterial({ color: 0xffb6c1 });
+            const crest = new THREE.Mesh(crestGeometry, crestMaterial);
+            crest.position.set(0, 2.3 + (i * 0.15), 0.4 - (i * 0.18));
+            crest.rotation.x = Math.PI / 5;
+            gecko.add(crest);
+        }
+        
+        // REALISTIC CRESTED GECKO EYES! 👀 (Large golden/orange eyes with vertical slit pupils!)
+        // Eye base (golden/orange color like real crested geckos)
+        const eyeGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+        const eyeMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xff9933,  // Orange-gold color
+            emissive: 0xcc6600, 
+            emissiveIntensity: 0.2,
+            shininess: 120
+        });
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        leftEye.position.set(-0.6, 2.15, 1.25);
+        gecko.add(leftEye);
+        const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        rightEye.position.set(0.6, 2.15, 1.25);
+        gecko.add(rightEye);
+        
+        // THIN VERTICAL BLACK SLIT PUPILS (like real gecko eyes!)
+        const pupilGeometry = new THREE.BoxGeometry(0.04, 0.45, 0.05);
+        const pupilMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+        const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+        leftPupil.position.set(-0.6, 2.15, 1.7);
+        gecko.add(leftPupil);
+        const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+        rightPupil.position.set(0.6, 2.15, 1.7);
+        gecko.add(rightPupil);
+        
+        // Pinhole pupils (multiple dots in vertical line - gecko specialty!)
+        const pinholeGeometry = new THREE.SphereGeometry(0.025, 8, 8);
+        const pinholeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+        
+        // Left eye pinholes
+        for (let i = 0; i < 3; i++) {
+            const pinhole = new THREE.Mesh(pinholeGeometry, pinholeMaterial);
+            pinhole.position.set(-0.6, 2.15 + (i - 1) * 0.12, 1.72);
+            gecko.add(pinhole);
+        }
+        
+        // Right eye pinholes
+        for (let i = 0; i < 3; i++) {
+            const pinhole = new THREE.Mesh(pinholeGeometry, pinholeMaterial);
+            pinhole.position.set(0.6, 2.15 + (i - 1) * 0.12, 1.72);
+            gecko.add(pinhole);
+        }
+        
+        // Eye highlights (white shine spots)
+        const highlightGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const highlightMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, 
+            emissive: 0xffffff, 
+            emissiveIntensity: 1
+        });
+        const leftHighlight = new THREE.Mesh(highlightGeometry, highlightMaterial);
+        leftHighlight.position.set(-0.54, 2.3, 1.65);
+        gecko.add(leftHighlight);
+        const rightHighlight = new THREE.Mesh(highlightGeometry, highlightMaterial);
+        rightHighlight.position.set(0.66, 2.3, 1.65);
+        gecko.add(rightHighlight);
+        
+        // Cute smile! 😊
+        const smileGeometry = new THREE.TorusGeometry(0.35, 0.07, 8, 16, Math.PI);
+        const smileMaterial = new THREE.MeshPhongMaterial({ color: 0xff69b4 });
+        const smile = new THREE.Mesh(smileGeometry, smileMaterial);
+        smile.position.set(0, 1.5, 1.4);
+        smile.rotation.x = Math.PI;
+        smile.rotation.z = Math.PI;
+        gecko.add(smile);
+        
+        // Rosy cheeks! 😊
+        const cheekGeometry = new THREE.SphereGeometry(0.35, 16, 16);
+        const cheekMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xffb6c1, 
+            transparent: true, 
+            opacity: 0.75 
+        });
+        const leftCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+        leftCheek.position.set(-1.1, 1.8, 1.1);
+        gecko.add(leftCheek);
+        const rightCheek = new THREE.Mesh(cheekGeometry, cheekMaterial);
+        rightCheek.position.set(1.1, 1.8, 1.1);
+        gecko.add(rightCheek);
+        
+        // TOP HAT 🎩
+        const hatBrimGeometry = new THREE.CylinderGeometry(1.6, 1.6, 0.22, 32);
+        const hatMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+        const hatBrim = new THREE.Mesh(hatBrimGeometry, hatMaterial);
+        hatBrim.position.set(0, 2.9, 0);
+        gecko.add(hatBrim);
+        
+        const hatTopGeometry = new THREE.CylinderGeometry(1.05, 1.05, 1.9, 32);
+        const hatTop = new THREE.Mesh(hatTopGeometry, hatMaterial);
+        hatTop.position.set(0, 3.95, 0);
+        gecko.add(hatTop);
+        
+        // Patriotic band
+        const hatBandGeometry = new THREE.CylinderGeometry(1.1, 1.1, 0.28, 32);
+        const hatBandCanvas = document.createElement('canvas');
+        hatBandCanvas.width = 256;
+        hatBandCanvas.height = 64;
+        const hatBandCtx = hatBandCanvas.getContext('2d');
+        hatBandCtx.fillStyle = '#cc0000';
+        hatBandCtx.fillRect(0, 0, 85, 64);
+        hatBandCtx.fillStyle = '#ffffff';
+        hatBandCtx.fillRect(85, 0, 86, 64);
+        hatBandCtx.fillStyle = '#0033cc';
+        hatBandCtx.fillRect(171, 0, 85, 64);
+        const hatBandTexture = new THREE.CanvasTexture(hatBandCanvas);
+        const hatBandMaterial = new THREE.MeshPhongMaterial({ map: hatBandTexture });
+        const hatBand = new THREE.Mesh(hatBandGeometry, hatBandMaterial);
+        hatBand.position.set(0, 3.2, 0);
+        gecko.add(hatBand);
+        
+        // PATRIOTIC SHIRT 🇺🇸
+        const shirtGeometry = new THREE.CylinderGeometry(1.15, 1.25, 1.9, 32);
+        const shirtCanvas = document.createElement('canvas');
+        shirtCanvas.width = 256;
+        shirtCanvas.height = 256;
+        const shirtCtx = shirtCanvas.getContext('2d');
+        
+        const stripeHeight = shirtCanvas.height / 6;
+        const colors = ['#cc0000', '#ffffff', '#0033cc', '#cc0000', '#ffffff', '#0033cc'];
+        colors.forEach((color, i) => {
+            shirtCtx.fillStyle = color;
+            shirtCtx.fillRect(0, i * stripeHeight, shirtCanvas.width, stripeHeight);
+        });
+        
+        const shirtTexture = new THREE.CanvasTexture(shirtCanvas);
+        const shirtMaterial = new THREE.MeshPhongMaterial({ map: shirtTexture });
+        const shirt = new THREE.Mesh(shirtGeometry, shirtMaterial);
+        shirt.position.set(0, 0, 0);
+        gecko.add(shirt);
+        
+        // BLUE JEANS 👖
+        const jeansGeometry = new THREE.CylinderGeometry(1.15, 1.05, 1.6, 32);
+        const jeansMaterial = new THREE.MeshPhongMaterial({ color: 0x1e3a8a });
+        const jeans = new THREE.Mesh(jeansGeometry, jeansMaterial);
+        jeans.position.set(0, -1.6, 0);
+        gecko.add(jeans);
+        
+        // Arms
+        const armGeometry = new THREE.CylinderGeometry(0.16, 0.13, 1.3, 16);
+        const armMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.position.set(-1.05, 0.25, 0.35);
+        leftArm.rotation.z = Math.PI / 3;
+        gecko.add(leftArm);
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.position.set(1.05, 0.25, 0.35);
+        rightArm.rotation.z = -Math.PI / 3;
+        gecko.add(rightArm);
+        
+        // Hands
+        const handGeometry = new THREE.SphereGeometry(0.22, 16, 16);
+        handGeometry.scale(1, 0.6, 1.3);
+        const handMaterial = new THREE.MeshPhongMaterial({ color: 0xffd4e5 });
+        const leftHand = new THREE.Mesh(handGeometry, handMaterial);
+        leftHand.position.set(-1.6, -0.45, 0.35);
+        gecko.add(leftHand);
+        const rightHand = new THREE.Mesh(handGeometry, handMaterial);
+        rightHand.position.set(1.6, -0.45, 0.35);
+        gecko.add(rightHand);
+        
+        // Legs
+        const legGeometry = new THREE.CylinderGeometry(0.22, 0.19, 1.6, 16);
+        const legMaterial = new THREE.MeshPhongMaterial({ color: 0x1e3a8a });
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(-0.52, -2.9, 0);
+        gecko.add(leftLeg);
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(0.52, -2.9, 0);
+        gecko.add(rightLeg);
+        
+        // Feet
+        const footGeometry = new THREE.SphereGeometry(0.27, 16, 16);
+        footGeometry.scale(1.3, 0.5, 1.6);
+        const footMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
+        const leftFoot = new THREE.Mesh(footGeometry, footMaterial);
+        leftFoot.position.set(-0.52, -3.8, 0.35);
+        gecko.add(leftFoot);
+        const rightFoot = new THREE.Mesh(footGeometry, footMaterial);
+        rightFoot.position.set(0.52, -3.8, 0.35);
+        gecko.add(rightFoot);
+        
+        // GECKO TAIL!
+        const tailSegments = 10;
+        for (let i = 0; i < tailSegments; i++) {
+            const segmentSize = 0.32 - (i * 0.028);
+            const tailSegmentGeometry = new THREE.SphereGeometry(segmentSize, 16, 16);
+            tailSegmentGeometry.scale(1, 1, 1.6);
+            const tailSegmentMaterial = new THREE.MeshPhongMaterial({ color: 0xffc0cb });
+            const tailSegment = new THREE.Mesh(tailSegmentGeometry, tailSegmentMaterial);
+            const angle = (i * 0.14);
+            tailSegment.position.set(
+                Math.sin(angle) * 0.35,
+                -0.5 - (i * 0.14),
+                -1.3 - (i * 0.38)
+            );
+            tailSegment.rotation.x = -Math.PI / 6 - (i * 0.09);
+            gecko.add(tailSegment);
+        }
+        
+        gecko.position.set(0, planetRadius + 4, 0);
+        scene.add(gecko);
+        
+        // Camera setup
+        let cameraDistance = 80;
+        camera.position.set(0, planetRadius + 4, cameraDistance);
+        camera.lookAt(gecko.position);
+        
+        // Media data
+        let mediaData = [];
+        let orbitals = [];
+        
+        // Feature flags
+        let currentMode = 0;
+        let rainbowHue = 0;
+        
+        // Mode slider
+        const modeSlider = document.getElementById('mode-slider');
+        const modeLabel = document.getElementById('mode-label');
+        const modeNames = ['Normal', 'Rainbow 🌈', 'Party 🎉', 'Auto Rotate 🔄'];
+        
+        modeSlider.addEventListener('input', (e) => {
+            currentMode = parseInt(e.target.value);
+            modeLabel.textContent = 'Mode: ' + modeNames[currentMode];
+        });
+        
+        // Keyboard controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ') {
+                magicFlowers();
+            }
+        });
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
+        
+        let planetRotation = { x: 0, y: 0 };
+        let geckoRotation = 0;
+        let isRunning = false;
+        let runAnimation = 0;
+        
+        // MAGICAL FLOWER THROW! ✨💐
+        function magicFlowers() {
+            console.log('✨ Billy Bob summons magical flowers!');
+            let step = 0;
+            const magicInterval = setInterval(() => {
+                const leftArm = gecko.children.find(c => c.position.x === -1.05 && c.position.y === 0.25);
+                const rightArm = gecko.children.find(c => c.position.x === 1.05 && c.position.y === 0.25);
+                
+                if (step < 15) {
+                    // Raise both arms up!
+                    if (leftArm) {
+                        leftArm.rotation.x = -Math.PI / 2 * (step / 15);
+                        leftArm.rotation.z = Math.PI / 3;
+                    }
+                    if (rightArm) {
+                        rightArm.rotation.x = -Math.PI / 2 * (step / 15);
+                        rightArm.rotation.z = -Math.PI / 3;
+                    }
+                } else if (step === 15) {
+                    // SPARKLES AND SMOKE!
+                    for (let i = 0; i < 20; i++) {
+                        const sparkleGeom = new THREE.SphereGeometry(0.1, 8, 8);
+                        const sparkleMat = new THREE.MeshPhongMaterial({ 
+                            color: [0xffff00, 0xff69b4, 0x00ffff, 0xff00ff][Math.floor(Math.random() * 4)],
+                            emissive: 0xffffff,
+                            emissiveIntensity: 1
+                        });
+                        const sparkle = new THREE.Mesh(sparkleGeom, sparkleMat);
+                        sparkle.position.set(
+                            gecko.position.x + (Math.random() - 0.5) * 2,
+                            gecko.position.y + 2 + (Math.random() - 0.5) * 2,
+                            gecko.position.z + (Math.random() - 0.5) * 2
+                        );
+                        scene.add(sparkle);
+                        
+                        setTimeout(() => scene.remove(sparkle), 1000);
+                    }
+                    
+                    // BOUQUET APPEARS!
+                    const bouquet = new THREE.Group();
+                    for (let i = 0; i < 7; i++) {
+                        const flowerGeom = new THREE.SphereGeometry(0.35, 8, 8);
+                        const flowerColors = [0xff69b4, 0xffff00, 0xff0000, 0xffa500, 0x9370db, 0xff1493, 0x00ff00];
+                        const flowerMat = new THREE.MeshPhongMaterial({ color: flowerColors[i] });
+                        const flower = new THREE.Mesh(flowerGeom, flowerMat);
+                        flower.position.set(Math.random() * 0.6 - 0.3, i * 0.25, Math.random() * 0.4);
+                        bouquet.add(flower);
+                    }
+                    
+                    bouquet.position.copy(gecko.position);
+                    bouquet.position.y += 2;
+                    scene.add(bouquet);
+                    
+                    // THROW IT!
+                    setTimeout(() => {
+                        let throwStep = 0;
+                        const throwInterval = setInterval(() => {
+                            // Calculate direction based on gecko rotation
+                            const direction = new THREE.Vector3(
+                                Math.sin(geckoRotation),
+                                0.3,
+                                Math.cos(geckoRotation)
+                            );
+                            
+                            bouquet.position.add(direction.multiplyScalar(2));
+                            bouquet.rotation.x += 0.3;
+                            bouquet.rotation.y += 0.2;
+                            
+                            throwStep++;
+                            if (throwStep > 30) {
+                                scene.remove(bouquet);
+                                clearInterval(throwInterval);
+                            }
+                        }, 30);
+                    }, 500);
+                } else if (step > 25) {
+                    // Lower arms back down
+                    const progress = (step - 25) / 15;
+                    if (leftArm) {
+                        leftArm.rotation.x = -Math.PI / 2 * (1 - progress);
+                        leftArm.rotation.z = Math.PI / 3;
+                    }
+                    if (rightArm) {
+                        rightArm.rotation.x = -Math.PI / 2 * (1 - progress);
+                        rightArm.rotation.z = -Math.PI / 3;
+                    }
+                }
+                
+                step++;
+                if (step > 40) {
+                    clearInterval(magicInterval);
+                    if (leftArm) { leftArm.rotation.x = 0; leftArm.rotation.z = Math.PI / 3; }
+                    if (rightArm) { rightArm.rotation.x = 0; rightArm.rotation.z = -Math.PI / 3; }
+                }
+            }, 40);
+        }
+        
+        // SIMPLE DANCE! 💃
+        function lizardDance() {
+            console.log('💃 Billy Bob dances!');
+            let danceCount = 0;
+            const danceInterval = setInterval(() => {
+                const leftArm = gecko.children.find(c => c.position.x === -1.05 && c.position.y === 0.25);
+                const rightArm = gecko.children.find(c => c.position.x === 1.05 && c.position.y === 0.25);
+                
+                // Wiggle body
+                body.rotation.z = Math.sin(danceCount * 0.3) * 0.2;
+                
+                // Wave arms
+                if (leftArm) leftArm.rotation.x = Math.sin(danceCount * 0.4) * 0.8;
+                if (rightArm) rightArm.rotation.x = Math.sin(danceCount * 0.4 + Math.PI) * 0.8;
+                
+                // Spin around!
+                gecko.rotation.y = geckoRotation + (danceCount * 0.15);
+                
+                // Bounce
+                body.position.y = Math.sin(danceCount * 0.5) * 0.15;
+                
+                danceCount++;
+                if (danceCount > 40) {
+                    clearInterval(danceInterval);
+                    body.rotation.z = 0;
+                    body.position.y = 0;
+                    gecko.rotation.y = geckoRotation;
+                    if (leftArm) { leftArm.rotation.x = 0; leftArm.rotation.z = Math.PI / 3; }
+                    if (rightArm) { rightArm.rotation.x = 0; rightArm.rotation.z = -Math.PI / 3; }
+                }
+            }, 50);
+        }
+        
+        function lizardWave() {
+            console.log('👋 Billy Bob waves!');
+            let waveCount = 0;
+            const waveInterval = setInterval(() => {
+                const rightArm = gecko.children.find(c => c.position.x === 1.05 && c.position.y === 0.25);
+                if (rightArm) {
+                    rightArm.rotation.z = -Math.PI / 3 + Math.sin(waveCount * 0.5) * 0.8;
+                }
+                waveCount++;
+                if (waveCount > 20) {
+                    clearInterval(waveInterval);
+                    if (rightArm) rightArm.rotation.z = -Math.PI / 3;
+                }
+            }, 50);
+        }
+        
+        function lizardJump() {
+            console.log('🦘 Billy Bob jumps!');
+            let jumpHeight = 0;
+            let jumpSpeed = 0.3;
+            const jumpInterval = setInterval(() => {
+                jumpHeight += jumpSpeed;
+                gecko.position.y = planetRadius + 4 + Math.sin(jumpHeight) * 3;
+                if (jumpHeight > Math.PI) {
+                    clearInterval(jumpInterval);
+                    gecko.position.y = planetRadius + 4;
+                }
+            }, 20);
+        }
+        
+        // Upload files
+        function uploadFiles() {
+            const fileInput = document.getElementById('file-input');
+            const files = fileInput.files;
+            
+            if (files.length === 0) {
+                alert('Please select files first!');
+                return;
+            }
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const url = URL.createObjectURL(file);
+                const type = file.type.startsWith('video') ? 'video' : 'audio';
+                
+                mediaData.push({
+                    name: file.name,
+                    url: url,
+                    type: type,
+                    thumbnail: null
+                });
+                
+                if (type === 'video') {
+                    extractVideoThumbnail(url, mediaData.length - 1);
+                }
+            }
+            
+            createOrbitals();
+            document.getElementById('upload-status').textContent = `✅ ${files.length} file(s) added!`;
+            setTimeout(() => {
+                document.getElementById('upload-status').textContent = '';
+            }, 3000);
+        }
+        
+        function extractVideoThumbnail(videoUrl, index) {
+            const video = document.createElement('video');
+            video.src = videoUrl;
+            video.crossOrigin = 'anonymous';
+            video.currentTime = 1;
+            
+            video.addEventListener('loadeddata', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const thumbnailUrl = canvas.toDataURL();
+                mediaData[index].thumbnail = thumbnailUrl;
+                
+                createOrbitals();
+            });
+        }
+        
+        // Create orbitals
+        function createOrbitals() {
+            orbitals.forEach(orbital => {
+                scene.remove(orbital.mesh);
+                scene.remove(orbital.tether);
+                scene.remove(orbital.label);
+            });
+            orbitals = [];
+            
+            mediaData.forEach((media, index) => {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const distance = 75 + Math.random() * 15;
+                
+                const x = distance * Math.sin(phi) * Math.cos(theta);
+                const y = distance * Math.cos(phi);
+                const z = distance * Math.sin(phi) * Math.sin(theta);
+                
+                const orbitalGeometry = new THREE.SphereGeometry(3, 32, 32);
+                let orbitalMaterial;
+                
+                if (media.type === 'video' && media.thumbnail) {
+                    const texture = new THREE.TextureLoader().load(media.thumbnail);
+                    orbitalMaterial = new THREE.MeshPhongMaterial({ map: texture });
+                } else if (media.type === 'video') {
+                    orbitalMaterial = new THREE.MeshPhongMaterial({ color: 0x4a90e2 });
+                } else {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 180px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('♪', canvas.width / 2, canvas.height / 2);
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    orbitalMaterial = new THREE.MeshPhongMaterial({ map: texture });
+                }
+                
+                const orbitalMesh = new THREE.Mesh(orbitalGeometry, orbitalMaterial);
+                orbitalMesh.position.set(x, y, z);
+                orbitalMesh.userData = { mediaIndex: index };
+                scene.add(orbitalMesh);
+                
+                const tetherLength = Math.sqrt(x*x + y*y + z*z);
+                const tetherGeometry = new THREE.CylinderGeometry(0.1, 0.1, tetherLength, 8);
+                const tetherMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+                const tether = new THREE.Mesh(tetherGeometry, tetherMaterial);
+                
+                tether.position.set(x/2, y/2, z/2);
+                tether.lookAt(x, y, z);
+                tether.rotateX(Math.PI / 2);
+                scene.add(tether);
+                
+                const labelCanvas = document.createElement('canvas');
+                labelCanvas.width = 512;
+                labelCanvas.height = 128;
+                const labelCtx = labelCanvas.getContext('2d');
+                labelCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                labelCtx.fillRect(0, 0, labelCanvas.width, labelCanvas.height);
+                labelCtx.fillStyle = '#ffffff';
+                labelCtx.font = 'bold 40px Arial';
+                labelCtx.textAlign = 'center';
+                labelCtx.fillText(media.name, labelCanvas.width / 2, labelCanvas.height / 2);
+                
+                const labelTexture = new THREE.CanvasTexture(labelCanvas);
+                const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture });
+                const label = new THREE.Sprite(labelMaterial);
+                label.position.set(x, y - 5, z);
+                label.scale.set(10, 2.5, 1);
+                scene.add(label);
+                
+                orbitals.push({ mesh: orbitalMesh, tether: tether, label: label, basePos: {x, y, z} });
+            });
+        }
+        
+        // Click detection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(orbitals.map(o => o.mesh));
+            
+            if (intersects.length > 0) {
+                const mediaIndex = intersects[0].object.userData.mediaIndex;
+                playMedia(mediaIndex);
+            }
+        });
+        
+        // Play media
+        let currentAudio = null;
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        
+        function playMedia(index) {
+            const media = mediaData[index];
+            
+            const videoViewer = document.getElementById('media-viewer');
+            const audioViewer = document.getElementById('media-viewer-audio');
+            const placeholder = document.getElementById('viewer-placeholder');
+            const closeBtn = document.getElementById('close-media');
+            
+            placeholder.style.display = 'none';
+            closeBtn.style.display = 'block';
+            
+            if (media.type === 'video') {
+                videoViewer.src = media.url;
+                videoViewer.style.display = 'block';
+                audioViewer.style.display = 'none';
+                videoViewer.play();
+                
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+            } else {
+                audioViewer.src = media.url;
+                audioViewer.style.display = 'block';
+                videoViewer.style.display = 'none';
+                audioViewer.play();
+                
+                currentAudio = audioViewer;
+                setupAudioVisualizer(audioViewer);
+            }
+        }
+        
+        function setupAudioVisualizer(audioElement) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+            
+            const source = audioContext.createMediaElementSource(audioElement);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+        }
+        
+        function closeMedia() {
+            const videoViewer = document.getElementById('media-viewer');
+            const audioViewer = document.getElementById('media-viewer-audio');
+            const placeholder = document.getElementById('viewer-placeholder');
+            const closeBtn = document.getElementById('close-media');
+            
+            videoViewer.pause();
+            videoViewer.src = '';
+            videoViewer.style.display = 'none';
+            
+            audioViewer.pause();
+            audioViewer.src = '';
+            audioViewer.style.display = 'none';
+            
+            placeholder.style.display = 'block';
+            closeBtn.style.display = 'none';
+            
+            if (currentAudio) {
+                currentAudio = null;
+            }
+        }
+        
+        function savePlanet() {
+            const saveData = {
+                media: mediaData.map(m => ({ name: m.name, url: m.url, type: m.type }))
+            };
+            
+            const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'planet-save.json';
+            a.click();
+        }
+        
+        function loadPlanet(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const saveData = JSON.parse(e.target.result);
+                mediaData = saveData.media;
+                createOrbitals();
+            };
+            reader.readAsText(file);
+        }
+        
+        // Zoom control
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomLabel = document.getElementById('zoom-label');
+        
+        zoomSlider.addEventListener('input', (e) => {
+            cameraDistance = parseInt(e.target.value);
+            
+            if (cameraDistance < 40) {
+                zoomLabel.textContent = 'Zoom: ULTRA Close! 🔍✨';
+            } else if (cameraDistance < 80) {
+                zoomLabel.textContent = 'Zoom: Close';
+            } else if (cameraDistance < 120) {
+                zoomLabel.textContent = 'Zoom: Medium';
+            } else if (cameraDistance < 160) {
+                zoomLabel.textContent = 'Zoom: Far';
+            } else {
+                zoomLabel.textContent = 'Zoom: Very Far 🌍';
+            }
+        });
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            isRunning = false;
+            
+            if (currentMode === 3) {
+                planetRotation.y += 0.005;
+            }
+            
+            // Arrow controls
+            if (keys['ArrowLeft']) {
+                planetRotation.y += 0.02;
+                geckoRotation = -Math.PI / 2;
+                isRunning = true;
+            }
+            if (keys['ArrowRight']) {
+                planetRotation.y -= 0.02;
+                geckoRotation = Math.PI / 2;
+                isRunning = true;
+            }
+            if (keys['ArrowUp']) {
+                planetRotation.x += 0.02;
+                geckoRotation = Math.PI;
+                isRunning = true;
+            }
+            if (keys['ArrowDown']) {
+                planetRotation.x -= 0.02;
+                geckoRotation = 0;
+                isRunning = true;
+            }
+            
+            planet.rotation.x = planetRotation.x;
+            planet.rotation.y = planetRotation.y;
+            gecko.rotation.y = geckoRotation;
+            
+            // Rainbow mode
+            if (currentMode === 1) {
+                rainbowHue += 0.003;
+                const hue = (rainbowHue % 1);
+                const color = new THREE.Color().setHSL(hue, 0.5, 0.85);
+                bodyMaterial.color.lerp(color, 0.05);
+                headMaterial.color.lerp(color, 0.05);
+                snoutMaterial.color.lerp(color, 0.05);
+            } else {
+                const originalBody = new THREE.Color(0xffc0cb);
+                const originalHead = new THREE.Color(0xffd4e5);
+                const originalSnout = new THREE.Color(0xffe4f0);
+                bodyMaterial.color.lerp(originalBody, 0.05);
+                headMaterial.color.lerp(originalHead, 0.05);
+                snoutMaterial.color.lerp(originalSnout, 0.05);
+            }
+            
+            // Party mode
+            if (currentMode === 2) {
+                const time = Date.now() * 0.003;
+                directionalLight.color.setHSL((time % 1), 1, 0.5);
+                stars.rotation.y += 0.01;
+            } else {
+                directionalLight.color.setHex(0xffffff);
+            }
+            
+            // Running animation
+            if (isRunning) {
+                runAnimation += 0.15;
+                
+                const leftLeg = gecko.children.find(c => c.position.x === -0.52 && c.position.y === -2.9);
+                const rightLeg = gecko.children.find(c => c.position.x === 0.52 && c.position.y === -2.9);
+                const leftArm = gecko.children.find(c => c.position.x === -1.05 && c.position.y === 0.25);
+                const rightArm = gecko.children.find(c => c.position.x === 1.05 && c.position.y === 0.25);
+                
+                if (leftLeg) leftLeg.rotation.x = Math.sin(runAnimation) * 0.4;
+                if (rightLeg) rightLeg.rotation.x = Math.sin(runAnimation + Math.PI) * 0.4;
+                if (leftArm) leftArm.rotation.x = Math.sin(runAnimation + Math.PI) * 0.2;
+                if (rightArm) rightArm.rotation.x = Math.sin(runAnimation) * 0.2;
+                
+                body.position.y = Math.sin(runAnimation * 2) * 0.1;
+            } else {
+                runAnimation = 0;
+            }
+            
+            // Audio visualizer
+            if (analyser && currentAudio && !currentAudio.paused) {
+                analyser.getByteFrequencyData(dataArray);
+                const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                const scale = 1 + (average / 256) * 0.3;
+                planet.scale.set(scale, scale, scale);
+            } else {
+                planet.scale.set(1, 1, 1);
+            }
+            
+            camera.position.set(0, planetRadius + 4, cameraDistance);
+            camera.lookAt(gecko.position);
+            
+            // Rotate orbitals
+            orbitals.forEach((orbital) => {
+                const time = Date.now() * 0.00005;
+                const rotatedX = orbital.basePos.x * Math.cos(time) - orbital.basePos.z * Math.sin(time);
+                const rotatedZ = orbital.basePos.x * Math.sin(time) + orbital.basePos.z * Math.cos(time);
+                
+                orbital.mesh.position.x = rotatedX;
+                orbital.mesh.position.z = rotatedZ;
+                orbital.label.position.x = rotatedX;
+                orbital.label.position.z = rotatedZ;
+                orbital.label.position.y = orbital.basePos.y - 5;
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        console.log('🎩🦎✨ Billy Bob is ready with realistic lizard eyes!');
+    </script>
+</body>
+</html>
